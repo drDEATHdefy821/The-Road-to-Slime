@@ -22,20 +22,21 @@
         this.gridY = gridY;
 
         this.landType = Math.floor(Math.random() * 3)
+
       }
 
       draw() {
         let cellColor = ""
-        if (this.landType = 0){
+        if (this.landType == 0){
         cellColor = 'rgba(90, 167, 201, 1)';
-      }else if (this.landType = 1) {
+      }else if (this.landType == 1) {
         cellColor = 'rgba(201, 197, 90, 1)';
-      }else if (this.landType = 2) {
+      }else if (this.landType == 2) {
         cellColor = 'rgba(73, 122, 44, 1)';
       }
-      
+
       this.context.fillStyle = cellColor;
-      this.context.fillRect(this.gridx * Cell.width, this.gridY * Cell.height, Cell.width, Cell.height);
+      this.context.fillRect(this.gridX * Cell.width, this.gridY * Cell.height, Cell.width, Cell.height);
       }
     }
 
@@ -96,7 +97,7 @@
                 }
               }
             }
-            if (this.gameObjects[centerIndex].landType == 1) {
+            if (this.gameObjects[centerIndex].landType == 1) {  //sand
               if (water >= 5) {
                 this.gameObjects[centerIndex].nextLandType = 0;
               } else if (land >= 5) {
@@ -104,33 +105,40 @@
               } else {
                 this.gameObjects[centerIndex].nextLandType = 1;
               }
-            } else if (this.gameObjects[centerIndex].landType == 2) {
+            } else if (this.gameObjects[centerIndex].landType == 2) { //Land
               if (water >= 5) {
+                this.gameObjects[centerIndex].nextLandType = 0;
+              } else if (sand >= 5){
                 this.gameObjects[centerIndex].nextLandType = 1;
               } else {
                 this.gameObjects[centerIndex].nextLandType = 2;
               }
-            } else {
-              this.gameObjects[centerIndex].nextLandType = 0;
-            }
+            } else if (this.gameObjects[centerIndex].landType == 0){ //water
+              if (land >= 5) {
+                this.gameObjects[centerIndex].nextLandType = 2;
+              } else if (sand >= 5){
+                this.gameObjects[centerIndex].nextLandType = 1;
+              } else {
+                this.gameObjects[centerIndex].nextLandType = 0;
+              }
           }
-        }
 
         for (let i = 0; i < this.gameObjects.length; i++) {
           this.gameObjects[i].landType = this.gameObjects[i].nextLandType;
         }
       }
-
+    }
+    }
       gameLoop() {
         this.checkSurrounding();
-
+        
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (let i = 0; i < this.gameObjects.length; i++) {
           this.gameObjects[i].draw();
         }
 
-        setTimeout( () => { window.requestAnimationFrame(() => this.gameLoop());})
+        setTimeout( () => { window.requestAnimationFrame(() => this.gameLoop());}, 100)
       }
     }
 
