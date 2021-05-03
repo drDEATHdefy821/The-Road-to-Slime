@@ -76,12 +76,13 @@
           for (let y = 0; y < GameWorld.numRows; y++) {
 
             let centerIndex = this.gridToIndex(x, y);
+            let land = 0;
+            let sand = 0;
+            let water = 0;
+
             for (let i = -1; i < 1; i++) {
               for (let j = -1; j < 1; j++) {
                 if (x + i >= 0 && y + j >= 0 && x + i <= GameWorld.numColumns) {
-                  var land = 0;
-                  var sand = 0;
-                  var water = 0;
 
                   if (i == 0 && j == 0) {
                     continue;
@@ -91,6 +92,7 @@
                     sand = sand + 1;
                   } else if (this.findLandType(x + i, y + j) == 2) {
                     land = land + 1;
+                    console.log(land);
                   }
                 } else {
                   continue;
@@ -98,23 +100,23 @@
               }
             }
             if (this.gameObjects[centerIndex].landType == 1) {  //sand
-              if (water >= 5) {
+              if (water >= 4) {
                 this.gameObjects[centerIndex].nextLandType = 0;
               } else if (land >= 5) {
                 this.gameObjects[centerIndex].nextLandType = 2;
               } else {
                 this.gameObjects[centerIndex].nextLandType = 1;
               }
-            } else if (this.gameObjects[centerIndex].landType == 2) { //Land
-              if (water >= 5) {
+          } else if (this.gameObjects[centerIndex].landType == 2) { //Land
+              if (water >= 9) {
                 this.gameObjects[centerIndex].nextLandType = 0;
               } else if (sand >= 5){
                 this.gameObjects[centerIndex].nextLandType = 1;
               } else {
                 this.gameObjects[centerIndex].nextLandType = 2;
               }
-            } else if (this.gameObjects[centerIndex].landType == 0){ //water
-              if (land >= 5) {
+          } else if (this.gameObjects[centerIndex].landType == 0){ //water
+              if (land >= 9) {
                 this.gameObjects[centerIndex].nextLandType = 2;
               } else if (sand >= 5){
                 this.gameObjects[centerIndex].nextLandType = 1;
@@ -122,16 +124,16 @@
                 this.gameObjects[centerIndex].nextLandType = 0;
               }
           }
-
-        for (let i = 0; i < this.gameObjects.length; i++) {
-          this.gameObjects[i].landType = this.gameObjects[i].nextLandType;
-        }
       }
+    }
+    for (let i = 0; i < this.gameObjects.length; i++) {
+      //console.log(this.gameObjects[i].nextLandType);
+      this.gameObjects[i].landType = this.gameObjects[i].nextLandType;
     }
     }
       gameLoop() {
         this.checkSurrounding();
-        
+
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (let i = 0; i < this.gameObjects.length; i++) {
