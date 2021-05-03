@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>The Road to Slime</title>
+    <style media="screen">
+      * { padding: 0; margin: 0;}
+      canvas { background: black; display: block; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+  <canvas id="canvas" width="750" height="750"></canvas>
+  <script type="text/javascript">
+
+    class Cell
+    {
+      // Set the size for each cell
+      static width = 5;
+      static height = 5;
+
+      constructor (context, gridX, gridY)
+      {
+        this.context = context;
+
+        //Store the position of this cell in the grid
+        this.gridX = gridX;
+        this.gridY = gridY;
+
+        //Make random squares alive
+        this.alive = Math.random() > 0.7;
+
+        if (this.alive == false) {
+        this.deathTime = 10;
+        }
+      }
+
+      draw() {
+
+        // var deathColor = this.getDeathColor();
+        var ratio = (this.deathTime / 10) - 0.1
+        var deathColor = "rgba(255, 128, 128," + ratio + ")"
+
+        this.context.beginPath();
+        this.context.fillStyle = this.alive?'#ff8080' : deathColor;
+        //this.context.fillRect(this.gridX * Cell.width, this.gridY * Cell.height, Cell.width, Cell.height);
+        this.context.arc(this.gridX * Cell.width, this.gridY * Cell.height, 2.5, 0, Math.PI*2);
+        this.context.fill();
+        this.context.closePath();
+      }
+    }
+
+    class GameWorld {
+      static numColumns = 150;
+      static numRows = 150;
+
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.context = this.canvas.getContext('2d');
+        this.gameObjects = [];
+
+        this.createGrid();
+
+        // Request an animation frame for the first time
+        // The gameloop() function will be called as a calback of this request
+        window.requestAnimationFrame(() => this.gameLoop());
+      }
+
+      createGrid()
+      {
+        for (let y = 0; y < GameWorld.numRows; y++) {
+          for (let x = 0; x < GameWorld.numColumns; x++) {
+            this.gameObjects.push(new Cell(this.context, x, y));
+          }
+        }
+      }
+
+      isAlive(x, y)
+      {
+        if (x < 0 || x >= GameWorld.numColumns || y < 0 || y >= GameWorld.numRows) {
+          return false;
+        }
+
+        return this.gameObjects[this.gridToIndex(x, y)].alive?1:0;
+      }
+
+      gridToIndex(x, y){
+        return x + (y * GameWorld.numColumns);
+      }
+      offsetGridToIndex(x, y) {
+        var ry = y - (Math.floor(Math.random() * 3) - 1);
+        var rx = x - (Math.floor(Math.random() * 3) - 1);
+        return rx + (ry * GameWorld.numColumns);
+      }
+      checkSurrounding ()
+      {
+        // Loop over all cells
+        for (let x = 0; x < GameWorld.numColumns; x++) {
+          for (let y = 0; y < GameWorld.numRows; y++) {
+            // Count the nearby population
+            let numAlive = this.isAlive(x - 1, y - 1) + this.isAlive(x, y - 1) + this.isAlive(x + 1, y - 1) + this.isAlive(x - 1, y) + this.isAlive(x + 1, y) + this.isAlive(x - 1, y + 1) + this.isAlive(x, y + 1) + this.isAlive(x + 1, y + 1);
+            let centerIndex = this.gridToIndex(x, y);
+
+            if (numAlive == 2) {
+              // Do Nothing
+              //this.gameObjects[centerIndex].isSearching = true;
+              this.gameObjects[centerIndex].nextAlive = this.gameObjects[centerIndex].alive;
+            }else if (numAlive == 3){
+              // Make alive
+              //this.gameObjects[centerIndex].isSearching = false;
+              this.gameObjects[centerIndex].nextAlive = true;
+              this.gameObjects[centerIndex].deathTime = 10;
+            }else{
+              // Make Dead
+              this.gameObjects[centerIndex].nextAlive = false;
+
+              if (this.gameObjects[centerIndex].deathTime > 1){
+                this.gameObjects[centerIndex].deathTime = this.gameObjects[centerIndex].deathTime - 1;
+              }
+            }
+          }
+         }
+           // Apply the new state to the cells
+        for (let i = 0; i < this.gameObjects.length; i++) {
+           this.gameObjects[i].alive = this.gameObjects[i].nextAlive;
+          }
+        }
+
+
+/*     search() {
+        for (let x = 0; x < GameWorld.numColumns; x++) {
+          for (let y = 0; y < GameWorld.numRows; y++) {
+            let centerIndex = this.gridToIndex(x, y);
+            let offsetIndex = this.offsetGridToIndex(x, y);
+           if (this.gameObjects[centerIndex].isSearching = true){
+             if (Math.random() > 0.7) {
+               let centerIndex = this.gridToIndex(x, y);
+               let offsetIndex = this.offsetGridToIndex(x, y);
+               this.gameObjects[centerIndex].nextAlive = false;
+               this.gameObjects[offsetIndex].nextAlive = true;
+             }
+          }
+      }
+       for (let i = 0; i < this.gameObjects.length; i++) {
+          this.gameObjects[i].alive = this.gameObjects[i].nextAlive;
+      }
+    }
+  } */
+      gameLoop() {
+        // Check the surrounding of each cells
+        this.checkSurrounding();
+//        this.search();
+        // Clear the screen
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw all the game objects
+        for (let i = 0; i < this.gameObjects.length; i++) {
+          this.gameObjects[i].draw();
+        }
+
+        // The loop function has reached its end, keep requesting new frames
+        setTimeout( () => {
+          window.requestAnimationFrame(() => this.gameLoop());
+      }) // The Delay will make make the game easier to follow
+    }
+  }
+
+  window.onload = () => {
+    // The page has loaded, start the game
+    let gameWorld = new GameWorld('canvas');
+  }
+
+  </script>
+  </body>
+</html>

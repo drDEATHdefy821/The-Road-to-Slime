@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>The Road to Slime</title>
+    <style media="screen">
+      * { padding: 0; margin: 0;}
+      canvas { background: black; display: block; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+  <canvas id="canvas" width="800" height="800"></canvas>
+  <script type="text/javascript">
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var x = canvas.width/2;
+    var y = canvas.height-30;
+    var dx = 1;
+    var dy = -1;
+    var ballRadius = 1;
+    var motionTrailLength = 40;
+    var positions = [];
+
+    function storeLastPosition(x, y) {
+      positions.push({
+        x: x,
+        y: y
+      });
+
+      if (positions.length > motionTrailLength) {
+        positions.shift();
+      }
+    }
+
+    function drawBall() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (var i = 0; i < positions.length; i++) {
+        var ratio = (i + 1) / positions.length;
+
+        ctx.beginPath();
+        ctx.arc(positions[i].x, positions[i].y, ballRadius, 0, 2 * Math.PI, true);
+        ctx.fillStyle = "rgba(255, 255, 255, " + ratio / 2 + ")";
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.closePath();
+
+      storeLastPosition(x, y);
+    }
+
+    function draw() {
+      // ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      x += dx;
+      y += dy;
+
+      if(y + dy < ballRadius || y + dy > canvas.height-ballRadius) {
+        dy = -dy;
+      }
+      if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+      }
+      requestAnimationFrame(draw);
+    }
+    draw()
+  </script>
+  </body>
+</html>
